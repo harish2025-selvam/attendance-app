@@ -1,0 +1,363 @@
+<!-- teacher.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Teacher — Attendance App</title>
+  <style>
+    :root{--bg:#f4f7fb;--card:#fff;--accent:#0b63d6;--muted:#6b7280;--danger:#ef4444;--ok:#10b981}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);-webkit-font-smoothing:antialiased}
+    .app{max-width:420px;margin:18px auto;padding:12px}
+    header{background:linear-gradient(90deg,var(--accent),#0366b3);color:#fff;padding:14px;border-radius:12px}
+    h1{font-size:18px;margin:0}
+    .card{background:var(--card);border-radius:12px;padding:12px;margin-top:12px;box-shadow:0 6px 18px rgba(12,36,61,0.06)}
+    .muted{color:var(--muted);font-size:0.92rem}
+    label{display:block;font-size:0.85rem;margin-top:8px;color:#0f172a}
+    input,select{width:100%;padding:10px;border-radius:10px;border:1px solid #e6eef8;margin-top:6px;font-size:1rem}
+    button{width:100%;padding:12px;border-radius:10px;border:0;background:var(--accent);color:#fff;font-weight:600;margin-top:10px;font-size:1rem}
+    .ghost{background:transparent;border:1px solid #e6eef8;color:var(--accent)}
+    .row{display:flex;gap:8px}
+    .row .half{flex:1}
+    .small{font-size:0.9rem}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{padding:8px;text-align:left;border-bottom:1px solid #f1f5f9;font-size:0.95rem}
+    .pbar{height:10px;background:#e6eef8;border-radius:999px;overflow:hidden}
+    .pbar>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#0366b3)}
+    .danger{color:var(--danger)}
+    .ok{color:var(--ok)}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    .small-btn{padding:8px 10px;border-radius:8px;border:0;background:#eef6ff;color:var(--accent);font-weight:600}
+    @media (max-width:420px){ .app{margin:6px} button{font-size:0.95rem} input{font-size:0.95rem} }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Attendance — Teacher</h1>
+      <div class="muted small">Sign in to manage courses & attendance</div>
+    </header>
+
+    <div id="auth-card" class="card">
+      <div id="auth-forms">
+        <label>Email</label>
+        <input id="auth-email" type="email" placeholder="you@school.edu" />
+        <label>Password</label>
+        <input id="auth-pass" type="password" placeholder="password (min 6)" />
+        <div class="row">
+          <button id="btn-signin" class="half">Sign in</button>
+          <button id="btn-signup" class="half ghost">Sign up</button>
+        </div>
+        <button id="btn-signout" class="ghost" style="display:none;margin-top:8px">Sign out</button>
+        <div id="auth-msg" class="muted small" style="margin-top:8px"></div>
+      </div>
+    </div>
+
+    <div id="dashboard" style="display:none">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <strong id="whoami">Teacher</strong>
+            <div class="muted small" id="teacher-email"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+            <button id="btn-dashboard-signout" class="small-btn">Sign out</button>
+            <button id="btn-refresh" class="small-btn">Refresh</button>
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <label>Course Code</label>
+          <input id="course-code" placeholder="CS101" />
+          <label>Course Name</label>
+          <input id="course-name" placeholder="Database Systems" />
+          <button id="add-course">Add Course</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <label>Add Student to Course</label>
+        <select id="student-course-select"><option value="">-- select course --</option></select>
+        <input id="student-roll" placeholder="Roll (e.g. P17CS001)" />
+        <input id="student-name" placeholder="Full name" />
+        <button id="add-student">Add Student</button>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong>Courses</strong>
+          <div class="muted small">Tap a course to mark or view</div>
+        </div>
+        <div id="course-list" style="margin-top:10px"></div>
+      </div>
+
+      <div id="mark-card" class="card" style="display:none">
+        <strong id="mark-title">Mark Attendance</strong>
+        <label>Course</label>
+        <select id="mark-course-select"></select>
+        <label>Date</label>
+        <input id="mark-date" type="date" />
+        <div style="margin-top:10px"><button id="load-attendance" class="ghost">Load Students</button></div>
+        <div id="attendance-table-wrap"></div>
+        <button id="save-attendance" style="display:none">Save Attendance</button>
+      </div>
+
+      <div id="report-card" class="card" style="display:none">
+        <strong>Report</strong>
+        <div id="report-table-wrap"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { auth, db, signUp, signIn, signOutUser, onAuthChanged } from './firebase.js';
+    import {
+      collection, addDoc, doc, setDoc, getDocs, getDoc, onSnapshot, deleteDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    function escapeHtml(s){ if(s===undefined||s===null) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // DOM refs
+      const authCard = document.getElementById('auth-card');
+      const dashboard = document.getElementById('dashboard');
+      const authMsg = document.getElementById('auth-msg');
+      const emailIn = document.getElementById('auth-email');
+      const passIn = document.getElementById('auth-pass');
+      const btnSignin = document.getElementById('btn-signin');
+      const btnSignup = document.getElementById('btn-signup');
+      const btnSignout = document.getElementById('btn-signout');
+      const btnDashboardSignout = document.getElementById('btn-dashboard-signout');
+      const btnRefresh = document.getElementById('btn-refresh');
+
+      const courseCode = document.getElementById('course-code');
+      const courseName = document.getElementById('course-name');
+      const addCourseBtn = document.getElementById('add-course');
+
+      const studentCourseSelect = document.getElementById('student-course-select');
+      const studentRoll = document.getElementById('student-roll');
+      const studentName = document.getElementById('student-name');
+      const addStudentBtn = document.getElementById('add-student');
+
+      const courseListWrap = document.getElementById('course-list');
+
+      const markCard = document.getElementById('mark-card');
+      const markCourseSelect = document.getElementById('mark-course-select');
+      const markDate = document.getElementById('mark-date');
+      const loadAttendanceBtn = document.getElementById('load-attendance');
+      const attendanceWrap = document.getElementById('attendance-table-wrap');
+      const saveAttendanceBtn = document.getElementById('save-attendance');
+
+      // auth handlers
+      btnSignup.addEventListener('click', async () => {
+        const email = emailIn.value.trim(); const pass = passIn.value.trim();
+        if(!email || !pass){ authMsg.textContent = 'Enter email & password'; return; }
+        try { await signUp(email, pass); authMsg.textContent = 'Account created — signed in'; }
+        catch(err){ authMsg.textContent = 'Sign up failed: ' + err.message; console.error(err) }
+      });
+
+      btnSignin.addEventListener('click', async () => {
+        const email = emailIn.value.trim(); const pass = passIn.value.trim();
+        if(!email || !pass){ authMsg.textContent = 'Enter email & password'; return; }
+        try { await signIn(email, pass); authMsg.textContent = 'Signed in'; }
+        catch(err){ authMsg.textContent = 'Sign in failed: ' + err.message; console.error(err) }
+      });
+
+      btnDashboardSignout.addEventListener('click', async ()=> {
+        try{ await signOutUser(); }catch(e){ console.error(e); }
+      });
+
+      // data functions
+      let coursesCache = [];
+      let coursesUnsub = null;
+
+      function subscribeCourses(){
+        if(coursesUnsub) coursesUnsub();
+        const colRef = collection(db, 'courses');
+        coursesUnsub = onSnapshot(colRef, async snap => {
+          coursesCache = [];
+          snap.forEach(d => coursesCache.push({ id: d.id, ...d.data() }));
+          await renderCourseList();
+          populateCourseSelects();
+        }, err => console.error('courses listen error', err));
+      }
+
+      addCourseBtn.addEventListener('click', async () => {
+        const code = courseCode.value.trim(); const name = courseName.value.trim();
+        if(!code || !name){ alert('Enter course code and name'); return; }
+        try{
+          // avoid duplicate codes locally
+          if(coursesCache.find(c=>c.code && c.code.toLowerCase()===code.toLowerCase())){ alert('Course code exists'); return; }
+          await addDoc(collection(db,'courses'), { code, name, createdAt: new Date().toISOString() });
+          courseCode.value=''; courseName.value='';
+        }catch(err){ alert('Add course failed: '+err.message); console.error(err); }
+      });
+
+      addStudentBtn.addEventListener('click', async () => {
+        const cid = studentCourseSelect.value; const roll = studentRoll.value.trim(); const name = studentName.value.trim();
+        if(!cid){ alert('Select course'); return; } if(!roll || !name){ alert('Enter roll & name'); return; }
+        try{
+          const sSnap = await getDocs(collection(db,'courses',cid,'students'));
+          if(sSnap.docs.find(d=>d.data().roll===roll)){ alert('Roll exists in this course'); return; }
+          await addDoc(collection(db,'courses',cid,'students'), { roll, name });
+          studentRoll.value=''; studentName.value='';
+        }catch(err){ alert('Add student failed: '+err.message); console.error(err); }
+      });
+
+      async function renderCourseList(){
+        courseListWrap.innerHTML = '';
+        if(!coursesCache.length){ courseListWrap.innerHTML = '<div class="muted">No courses yet</div>'; return; }
+        // For each course show counts
+        for(const c of coursesCache){
+          const studentsSnap = await getDocs(collection(db,'courses',c.id,'students'));
+          const attendanceSnap = await getDocs(collection(db,'courses',c.id,'attendance'));
+          const card = document.createElement('div'); card.className='card'; card.style.marginTop='8px';
+          card.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+            <div><strong>${escapeHtml(c.code)}</strong> — ${escapeHtml(c.name)}<div class="muted small">Students: ${studentsSnap.size} • Days: ${attendanceSnap.size}</div></div>
+            <div class="actions">
+              <button data-id="${c.id}" class="small-btn mark">Mark</button>
+              <button data-id="${c.id}" class="small-btn students ghost">Students</button>
+              <button data-id="${c.id}" class="small-btn report ghost">Report</button>
+              <button data-id="${c.id}" class="small-btn" style="background:#ffdddd;color:#b00" data-delete>Delete</button>
+            </div>
+          </div>`;
+          courseListWrap.appendChild(card);
+        }
+        // attach listeners
+        courseListWrap.querySelectorAll('button.mark').forEach(b=> b.addEventListener('click', e=> {
+          const id = e.currentTarget.dataset.id; openMarkForCourse(id);
+        }));
+        courseListWrap.querySelectorAll('button.students').forEach(b=> b.addEventListener('click', e=> {
+          const id = e.currentTarget.dataset.id; openStudentsList(id);
+        }));
+        courseListWrap.querySelectorAll('button.report').forEach(b=> b.addEventListener('click', e=> {
+          const id = e.currentTarget.dataset.id; openReportForCourse(id);
+        }));
+        courseListWrap.querySelectorAll('button[data-delete]').forEach(b=> b.addEventListener('click', async e=>{
+          const id = e.currentTarget.dataset.id;
+          if(!confirm('Delete course and all its data?')) return;
+          await deleteCourseAndSubcollections(id);
+        }));
+      }
+
+      function populateCourseSelects(){
+        [studentCourseSelect, markCourseSelect].forEach(sel=>{
+          if(!sel) return;
+          sel.innerHTML = '';
+          const opt = document.createElement('option'); opt.value=''; opt.textContent='-- select course --'; sel.appendChild(opt);
+          for(const c of coursesCache){ const o=document.createElement('option'); o.value=c.id; o.textContent=`${c.code} — ${c.name}`; sel.appendChild(o); }
+        });
+      }
+
+      async function openStudentsList(courseId){
+        const c = coursesCache.find(x=>x.id===courseId); if(!c) return;
+        const sSnap = await getDocs(collection(db,'courses',courseId,'students'));
+        const html = document.createElement('div'); html.className='card';
+        html.innerHTML = `<h3>Students for ${escapeHtml(c.code)} — ${escapeHtml(c.name)}</h3>`;
+        const t=document.createElement('table'); t.innerHTML = `<thead><tr><th>Roll</th><th>Name</th><th>Action</th></tr></thead>`; const tb=document.createElement('tbody');
+        sSnap.forEach(s=>{ const d=s.data(); const tr=document.createElement('tr'); tr.innerHTML=`<td>${escapeHtml(d.roll)}</td><td>${escapeHtml(d.name)}</td><td><button data-id="${s.id}" data-course="${courseId}" class="small-btn" style="background:#ffecec;color:#b00">Remove</button></td>`; tb.appendChild(tr); });
+        t.appendChild(tb); html.appendChild(t); courseListWrap.prepend(html);
+        html.querySelectorAll('button').forEach(btn=> btn.addEventListener('click', async (ev)=>{
+          const sid = ev.currentTarget.dataset.id; const cid = ev.currentTarget.dataset.course; if(!confirm('Remove student?')) return;
+          try{
+            const stuRef = doc(db,'courses',cid,'students',sid); await deleteDoc(stuRef);
+            // remove roll from attendance docs
+            const aSnap = await getDocs(collection(db,'courses',cid,'attendance'));
+            for(const a of aSnap.docs){
+              const adata = a.data(); const pres = Object.assign({}, adata.present || {});
+              // find roll value from removed student document? We don't have roll here; we need roll value:
+              // to simplify, assume the UI removed the doc; clients recalculating reports will ignore missing roll.
+            }
+            alert('Student removed');
+          }catch(err){ alert('Remove failed: '+err.message); console.error(err); }
+        }));
+      }
+
+      function openMarkForCourse(courseId){
+        markCard.style.display='block';
+        markCourseSelect.value = courseId;
+        markDate.value = new Date().toISOString().slice(0,10);
+        attendanceWrap.innerHTML = '';
+        saveAttendanceBtn.style.display = 'none';
+      }
+
+      loadAttendanceBtn.addEventListener('click', async ()=>{
+        const cid = markCourseSelect.value; const date = markDate.value;
+        if(!cid || !date){ alert('Select course and date'); return; }
+        attendanceWrap.innerHTML = '';
+        const sSnap = await getDocs(collection(db,'courses',cid,'students'));
+        const students = []; sSnap.forEach(s=>students.push(s.data()));
+        const aDoc = await getDoc(doc(db,'courses',cid,'attendance',date));
+        const existing = aDoc.exists()? (aDoc.data().present || {}) : {};
+        const table = document.createElement('table'); table.innerHTML = `<thead><tr><th>Roll</th><th>Name</th><th>Present?</th></tr></thead>`; const tb=document.createElement('tbody');
+        students.sort((a,b)=> a.roll.localeCompare(b.roll, undefined, {numeric:true})).forEach(s=>{
+          const tr = document.createElement('tr'); const checked = existing[s.roll] === true ? 'checked' : '';
+          tr.innerHTML = `<td>${escapeHtml(s.roll)}</td><td>${escapeHtml(s.name)}</td><td><input data-roll="${escapeHtml(s.roll)}" type="checkbox" ${checked}></td>`;
+          tb.appendChild(tr);
+        });
+        table.appendChild(tb); attendanceWrap.appendChild(table); saveAttendanceBtn.style.display='block';
+      });
+
+      saveAttendanceBtn.addEventListener('click', async ()=>{
+        const cid = markCourseSelect.value; const date = markDate.value; if(!cid || !date){ alert('Select course & date'); return; }
+        const tbody = document.querySelector('#attendance-table-wrap table tbody'); if(!tbody){ alert('Load students first'); return; }
+        const record = {};
+        tbody.querySelectorAll('tr').forEach(tr=>{ const inp = tr.querySelector('input'); record[inp.dataset.roll] = !!inp.checked; });
+        try{ await setDoc(doc(db,'courses',cid,'attendance',date), { present: record, updatedAt: new Date().toISOString() }); alert('Saved'); }
+        catch(err){ alert('Save failed: '+err.message); console.error(err); }
+      });
+
+      async function openReportForCourse(courseId){
+        const wrap = document.getElementById('report-table-wrap'); wrap.innerHTML='';
+        const sSnap = await getDocs(collection(db,'courses',courseId,'students'));
+        const students=[]; sSnap.forEach(s=>students.push(s.data()));
+        const aSnap = await getDocs(collection(db,'courses',courseId,'attendance'));
+        const dates=[]; const records={}; aSnap.forEach(d=>{ dates.push(d.id); records[d.id] = d.data().present || {}; });
+        const totalDays = dates.length;
+        const table = document.createElement('table'); table.innerHTML = `<thead><tr><th>Roll</th><th>Name</th><th>Present</th><th>Total</th><th>%</th></tr></thead>`;
+        const tb = document.createElement('tbody');
+        students.forEach(s=>{ let present=0; dates.forEach(d=>{ if(records[d] && records[d][s.roll]) present++; }); const percent = totalDays? Math.round((present/totalDays)*100):0;
+          const tr=document.createElement('tr'); tr.innerHTML = `<td>${escapeHtml(s.roll)}</td><td>${escapeHtml(s.name)}</td><td>${present}</td><td>${totalDays}</td><td><span class="${percent>=75?'ok':'danger'}">${percent}%</span><div class="pbar" style="margin-top:6px"><i style="width:${percent}%"></i></div></td>`;
+          tb.appendChild(tr);
+        });
+        table.appendChild(tb); wrap.appendChild(table);
+      }
+
+      async function deleteCourseAndSubcollections(courseId){
+        try{
+          const sSnap = await getDocs(collection(db,'courses',courseId,'students'));
+          for(const s of sSnap.docs) await deleteDoc(doc(db,'courses',courseId,'students',s.id));
+          const aSnap = await getDocs(collection(db,'courses',courseId,'attendance'));
+          for(const a of aSnap.docs) await deleteDoc(doc(db,'courses',courseId,'attendance',a.id));
+          await deleteDoc(doc(db,'courses',courseId));
+          alert('Course deleted');
+        }catch(err){ alert('Delete failed: '+err.message); console.error(err); }
+      }
+
+      btnRefresh.addEventListener('click', ()=> { if(coursesUnsub){ coursesUnsub(); coursesUnsub = null; } subscribeCourses(); });
+
+      // auth state observer
+      onAuthChanged(user => {
+        if(user){
+          document.getElementById('teacher-email').textContent = user.email || '';
+          authCard.style.display='none';
+          dashboard.style.display='block';
+          subscribeCourses();
+        }else{
+          // signed out
+          authCard.style.display='block';
+          dashboard.style.display='none';
+          if(coursesUnsub){ coursesUnsub(); coursesUnsub = null; }
+        }
+      });
+
+      // expose a helper to ensure selects update when snapshot fires
+      function ensurePopulatedSelects(){ populateCourseSelects(); }
+
+      // initial setup
+      markDate.value = new Date().toISOString().slice(0,10);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Attendance App</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app center">
+    <div class="card">
+      <h1>Attendance App</h1>
+      <div class="muted">Open as Teacher or Student</div>
+      <div style="margin-top:16px">
+        <a href="teacher.html"><button class="big">I am a Teacher</button></a>
+        <a href="student.html"><button class="big ghost">I am a Student</button></a>
+      </div>
+    </div>
+  </div>
+  <script>
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/service-worker.js').catch(()=>{}); }
+  </script>
+</body>
+</html>
