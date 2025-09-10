@@ -10,14 +10,14 @@ import {
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
-apiKey: "AIzaSyAIcZ9ywKzVdDVSCzSco8hdeet-WEq6eTo",
+  apiKey: "AIzaSyAIcZ9ywKzVdDVSCzSco8hdeet-WEq6eTo",
   authDomain: "attendence-app-fbeaf.firebaseapp.com",
   projectId: "attendence-app-fbeaf",
   storageBucket: "attendence-app-fbeaf.firebasestorage.app",
   messagingSenderId: "1028478992092",
-  appId: "1:1028478992092:web:ff055350325acd2654be19"
+  appId: "1:1028478992092:web:ff055350325acd2654be19",
+  measurementId: "G-873RPZSCSC"
 };
-
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
