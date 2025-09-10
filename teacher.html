@@ -1,50 +1,114 @@
-<!-- teacher.html -->
+<!-- teacher.html (stunning UI + semester + PDF export) -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Teacher — Attendance App</title>
+
+  <!-- Stunning mobile-first styles -->
   <style>
-    :root{--bg:#f4f7fb;--card:#fff;--accent:#0b63d6;--muted:#6b7280;--danger:#ef4444;--ok:#10b981}
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);-webkit-font-smoothing:antialiased}
-    .app{max-width:420px;margin:18px auto;padding:12px}
-    header{background:linear-gradient(90deg,var(--accent),#0366b3);color:#fff;padding:14px;border-radius:12px}
-    h1{font-size:18px;margin:0}
-    .card{background:var(--card);border-radius:12px;padding:12px;margin-top:12px;box-shadow:0 6px 18px rgba(12,36,61,0.06)}
-    .muted{color:var(--muted);font-size:0.92rem}
-    label{display:block;font-size:0.85rem;margin-top:8px;color:#0f172a}
-    input,select{width:100%;padding:10px;border-radius:10px;border:1px solid #e6eef8;margin-top:6px;font-size:1rem}
-    button{width:100%;padding:12px;border-radius:10px;border:0;background:var(--accent);color:#fff;font-weight:600;margin-top:10px;font-size:1rem}
-    .ghost{background:transparent;border:1px solid #e6eef8;color:var(--accent)}
-    .row{display:flex;gap:8px}
+    :root{
+      --bg: linear-gradient(135deg,#eef2ff 0%, #fbf9ff 100%);
+      --glass: rgba(255,255,255,0.72);
+      --accent: #2563eb;
+      --accent-2: #0b63d6;
+      --accent-dark: #1e40af;
+      --muted: #6b7280;
+      --ok: #10b981;
+      --danger: #ef4444;
+      --card-radius: 18px;
+      --shadow: 0 10px 30px rgba(13,38,76,0.08);
+      --soft-shadow: 0 6px 18px rgba(12,36,61,0.06);
+      --gap: 12px;
+      --trans: 240ms cubic-bezier(.2,.9,.3,1);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;background:var(--bg);-webkit-font-smoothing:antialiased;color:#0f172a}
+    .app{max-width:520px;margin:12px auto;padding:14px}
+    header{
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));
+      color:#fff;padding:18px;border-radius:20px;box-shadow:0 8px 30px rgba(14,60,130,0.16);
+    }
+    header h1{margin:0;font-size:18px;font-weight:700}
+    header .sub{opacity:.95;margin-top:6px;font-size:0.92rem;font-weight:500}
+    .card{
+      background:var(--glass);
+      border-radius:var(--card-radius);
+      padding:16px;
+      margin-top:14px;
+      box-shadow:var(--soft-shadow);
+      backdrop-filter: blur(8px) saturate(120%);
+      transition: transform var(--trans), box-shadow var(--trans), opacity var(--trans);
+    }
+    .card:active{transform: translateY(1px)}
+    label{display:block;font-size:0.85rem;color:#071135;margin-top:6px;font-weight:600}
+    input,select{
+      width:100%;padding:12px;margin-top:8px;border-radius:12px;border:1px solid rgba(14,60,130,0.06);font-size:1rem;background:#fff;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,0.6);
+    }
+    .row{display:flex;gap:10px}
     .row .half{flex:1}
+    .muted{color:var(--muted);margin-top:6px}
     .small{font-size:0.9rem}
+    button{
+      width:100%;padding:13px;border-radius:12px;border:0;background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;font-weight:700;margin-top:12px;font-size:1rem;cursor:pointer;box-shadow:0 6px 18px rgba(37,99,235,0.12);
+      transition: transform var(--trans), opacity var(--trans);
+    }
+    button:hover{transform:translateY(-3px);opacity:.98}
+    button.ghost{background:transparent;border:2px solid rgba(11,99,214,0.12);color:var(--accent-dark);font-weight:700}
+    .small-btn{padding:8px 10px;border-radius:10px;border:0;background:#eef6ff;color:var(--accent);font-weight:700}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    .course-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .course-meta{font-size:0.95rem}
+    .course-meta strong{display:block;font-size:1rem;color:#071135}
+    .muted.small{font-size:0.85rem}
     table{width:100%;border-collapse:collapse;margin-top:10px}
-    th,td{padding:8px;text-align:left;border-bottom:1px solid #f1f5f9;font-size:0.95rem}
-    .pbar{height:10px;background:#e6eef8;border-radius:999px;overflow:hidden}
-    .pbar>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#0366b3)}
+    th,td{padding:10px;text-align:left;border-bottom:1px solid rgba(10,20,40,0.04);font-size:0.95rem}
+    .pbar{height:10px;background:#eef2ff;border-radius:999px;overflow:hidden}
+    .pbar>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
     .danger{color:var(--danger)}
     .ok{color:var(--ok)}
-    .actions{display:flex;gap:8px;flex-wrap:wrap}
-    .small-btn{padding:8px 10px;border-radius:8px;border:0;background:#eef6ff;color:var(--accent);font-weight:600}
-    @media (max-width:420px){ .app{margin:6px} button{font-size:0.95rem} input{font-size:0.95rem} }
+    .tiny{font-size:0.82rem;color:var(--muted)}
+    .card-grid{display:grid;grid-template-columns:1fr;gap:12px}
+    .student-card{
+      border-radius:14px;padding:12px;background:#fff;box-shadow:0 6px 18px rgba(12,36,61,0.06);display:flex;justify-content:space-between;align-items:center;
+    }
+    .student-card .left{display:flex;flex-direction:column;gap:6px}
+    .student-card .roll{font-weight:700;color:#0b2a66}
+    .student-card .present{font-weight:700}
+    .controls{display:flex;gap:8px;align-items:center}
+    .download-btn{background:linear-gradient(135deg,#06b6d4,#2563eb);color:#fff;padding:10px 12px;border-radius:12px;border:0;font-weight:700}
+    .empty{padding:18px;border-radius:12px;text-align:center;color:var(--muted)}
+    @media (min-width:720px){
+      .card-grid{grid-template-columns:repeat(2, 1fr)}
+    }
+    @media (max-width:420px){
+      .app{padding:12px}
+      header{padding:14px}
+      .card{padding:12px}
+    }
   </style>
+
+  <!-- jsPDF + html2canvas for client-side PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
   <div class="app">
     <header>
       <h1>Attendance — Teacher</h1>
-      <div class="muted small">Sign in to manage courses & attendance</div>
+      <div class="sub">Beautiful UI • Semester support • PDF reports</div>
     </header>
 
+    <!-- Auth Card -->
     <div id="auth-card" class="card">
       <div id="auth-forms">
         <label>Email</label>
         <input id="auth-email" type="email" placeholder="you@school.edu" />
         <label>Password</label>
         <input id="auth-pass" type="password" placeholder="password (min 6)" />
-        <div class="row">
+        <div class="row" style="margin-top:8px">
           <button id="btn-signin" class="half">Sign in</button>
           <button id="btn-signup" class="half ghost">Sign up</button>
         </div>
@@ -53,7 +117,9 @@
       </div>
     </div>
 
+    <!-- Dashboard -->
     <div id="dashboard" style="display:none">
+      <!-- Teacher info & actions -->
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
@@ -66,7 +132,21 @@
           </div>
         </div>
 
+        <!-- Add Course (now with Semester) -->
         <div style="margin-top:12px">
+          <label>Semester</label>
+          <select id="course-sem">
+            <option value="">-- select semester --</option>
+            <option value="1">1st</option>
+            <option value="2">2nd</option>
+            <option value="3">3rd</option>
+            <option value="4">4th</option>
+            <option value="5">5th</option>
+            <option value="6">6th</option>
+            <option value="7">7th</option>
+            <option value="8">8th</option>
+          </select>
+
           <label>Course Code</label>
           <input id="course-code" placeholder="CS101" />
           <label>Course Name</label>
@@ -75,6 +155,7 @@
         </div>
       </div>
 
+      <!-- Add Student -->
       <div class="card">
         <label>Add Student to Course</label>
         <select id="student-course-select"><option value="">-- select course --</option></select>
@@ -83,14 +164,16 @@
         <button id="add-student">Add Student</button>
       </div>
 
+      <!-- Courses List -->
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <strong>Courses</strong>
-          <div class="muted small">Tap a course to mark or view</div>
+          <div class="muted small">Tap a course to mark, view or download report</div>
         </div>
-        <div id="course-list" style="margin-top:10px"></div>
+        <div id="course-list" style="margin-top:12px"></div>
       </div>
 
+      <!-- Mark Attendance -->
       <div id="mark-card" class="card" style="display:none">
         <strong id="mark-title">Mark Attendance</strong>
         <label>Course</label>
@@ -98,266 +181,379 @@
         <label>Date</label>
         <input id="mark-date" type="date" />
         <div style="margin-top:10px"><button id="load-attendance" class="ghost">Load Students</button></div>
-        <div id="attendance-table-wrap"></div>
+        <div id="attendance-table-wrap" style="margin-top:10px"></div>
         <button id="save-attendance" style="display:none">Save Attendance</button>
       </div>
 
+      <!-- Report / Download -->
       <div id="report-card" class="card" style="display:none">
-        <strong>Report</strong>
-        <div id="report-table-wrap"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong>Course Report</strong>
+          <div class="controls">
+            <button id="download-pdf" class="download-btn">Download PDF</button>
+          </div>
+        </div>
+        <div id="report-meta" class="tiny muted" style="margin-top:8px"></div>
+        <div id="report-table-wrap" style="margin-top:12px"></div>
       </div>
     </div>
-
   </div>
 
+  <!-- Main logic -->
   <script type="module">
     import { auth, db, signUp, signIn, signOutUser, onAuthChanged } from './firebase.js';
     import {
       collection, addDoc, doc, setDoc, getDocs, getDoc, onSnapshot, deleteDoc
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+    // Helpers
     function escapeHtml(s){ if(s===undefined||s===null) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      // DOM refs
-      const authCard = document.getElementById('auth-card');
-      const dashboard = document.getElementById('dashboard');
-      const authMsg = document.getElementById('auth-msg');
-      const emailIn = document.getElementById('auth-email');
-      const passIn = document.getElementById('auth-pass');
-      const btnSignin = document.getElementById('btn-signin');
-      const btnSignup = document.getElementById('btn-signup');
-      const btnSignout = document.getElementById('btn-signout');
-      const btnDashboardSignout = document.getElementById('btn-dashboard-signout');
-      const btnRefresh = document.getElementById('btn-refresh');
+    // DOM refs
+    const authCard = document.getElementById('auth-card');
+    const dashboard = document.getElementById('dashboard');
+    const authMsg = document.getElementById('auth-msg');
+    const emailIn = document.getElementById('auth-email');
+    const passIn = document.getElementById('auth-pass');
+    const btnSignin = document.getElementById('btn-signin');
+    const btnSignup = document.getElementById('btn-signup');
+    const btnDashboardSignout = document.getElementById('btn-dashboard-signout');
+    const btnRefresh = document.getElementById('btn-refresh');
 
-      const courseCode = document.getElementById('course-code');
-      const courseName = document.getElementById('course-name');
-      const addCourseBtn = document.getElementById('add-course');
+    const courseSem = document.getElementById('course-sem');
+    const courseCode = document.getElementById('course-code');
+    const courseName = document.getElementById('course-name');
+    const addCourseBtn = document.getElementById('add-course');
 
-      const studentCourseSelect = document.getElementById('student-course-select');
-      const studentRoll = document.getElementById('student-roll');
-      const studentName = document.getElementById('student-name');
-      const addStudentBtn = document.getElementById('add-student');
+    const studentCourseSelect = document.getElementById('student-course-select');
+    const studentRoll = document.getElementById('student-roll');
+    const studentName = document.getElementById('student-name');
+    const addStudentBtn = document.getElementById('add-student');
 
-      const courseListWrap = document.getElementById('course-list');
+    const courseListWrap = document.getElementById('course-list');
 
-      const markCard = document.getElementById('mark-card');
-      const markCourseSelect = document.getElementById('mark-course-select');
-      const markDate = document.getElementById('mark-date');
-      const loadAttendanceBtn = document.getElementById('load-attendance');
-      const attendanceWrap = document.getElementById('attendance-table-wrap');
-      const saveAttendanceBtn = document.getElementById('save-attendance');
+    const markCard = document.getElementById('mark-card');
+    const markCourseSelect = document.getElementById('mark-course-select');
+    const markDate = document.getElementById('mark-date');
+    const loadAttendanceBtn = document.getElementById('load-attendance');
+    const attendanceWrap = document.getElementById('attendance-table-wrap');
+    const saveAttendanceBtn = document.getElementById('save-attendance');
 
-      // auth handlers
-      btnSignup.addEventListener('click', async () => {
-        const email = emailIn.value.trim(); const pass = passIn.value.trim();
-        if(!email || !pass){ authMsg.textContent = 'Enter email & password'; return; }
-        try { await signUp(email, pass); authMsg.textContent = 'Account created — signed in'; }
-        catch(err){ authMsg.textContent = 'Sign up failed: ' + err.message; console.error(err) }
-      });
+    const reportCard = document.getElementById('report-card');
+    const reportTableWrap = document.getElementById('report-table-wrap');
+    const reportMeta = document.getElementById('report-meta');
+    const downloadPdfBtn = document.getElementById('download-pdf');
 
-      btnSignin.addEventListener('click', async () => {
-        const email = emailIn.value.trim(); const pass = passIn.value.trim();
-        if(!email || !pass){ authMsg.textContent = 'Enter email & password'; return; }
-        try { await signIn(email, pass); authMsg.textContent = 'Signed in'; }
-        catch(err){ authMsg.textContent = 'Sign in failed: ' + err.message; console.error(err) }
-      });
+    let coursesCache = [];
+    let coursesUnsub = null;
 
-      btnDashboardSignout.addEventListener('click', async ()=> {
-        try{ await signOutUser(); }catch(e){ console.error(e); }
-      });
+    // Auth
+    btnSignup.addEventListener('click', async () => {
+      const email = emailIn.value.trim(); const pass = passIn.value.trim();
+      if(!email || !pass){ authMsg.textContent = 'Enter email & password'; return; }
+      try { await signUp(email, pass); authMsg.textContent = 'Account created — signed in'; }
+      catch(err){ authMsg.textContent = 'Sign up failed: ' + err.message; console.error(err) }
+    });
 
-      // data functions
-      let coursesCache = [];
-      let coursesUnsub = null;
+    btnSignin.addEventListener('click', async () => {
+      const email = emailIn.value.trim(); const pass = passIn.value.trim();
+      if(!email || !pass){ authMsg.textContent = 'Enter email & password'; return; }
+      try { await signIn(email, pass); authMsg.textContent = 'Signed in'; }
+      catch(err){ authMsg.textContent = 'Sign in failed: ' + err.message; console.error(err) }
+    });
 
-      function subscribeCourses(){
-        if(coursesUnsub) coursesUnsub();
-        const colRef = collection(db, 'courses');
-        coursesUnsub = onSnapshot(colRef, async snap => {
-          coursesCache = [];
-          snap.forEach(d => coursesCache.push({ id: d.id, ...d.data() }));
-          await renderCourseList();
-          populateCourseSelects();
-        }, err => console.error('courses listen error', err));
-      }
+    btnDashboardSignout.addEventListener('click', async ()=> {
+      try{ await signOutUser(); }catch(e){ console.error(e); }
+    });
 
-      addCourseBtn.addEventListener('click', async () => {
-        const code = courseCode.value.trim(); const name = courseName.value.trim();
-        if(!code || !name){ alert('Enter course code and name'); return; }
-        try{
-          // avoid duplicate codes locally
-          if(coursesCache.find(c=>c.code && c.code.toLowerCase()===code.toLowerCase())){ alert('Course code exists'); return; }
-          await addDoc(collection(db,'courses'), { code, name, createdAt: new Date().toISOString() });
-          courseCode.value=''; courseName.value='';
-        }catch(err){ alert('Add course failed: '+err.message); console.error(err); }
-      });
+    // Real-time courses subscription
+    function subscribeCourses(){
+      if(coursesUnsub) coursesUnsub();
+      const colRef = collection(db, 'courses');
+      coursesUnsub = onSnapshot(colRef, async snap => {
+        coursesCache = [];
+        snap.forEach(d => coursesCache.push({ id: d.id, ...d.data() }));
+        await renderCourseList();
+        populateCourseSelects();
+      }, err => console.error('courses listen error', err));
+    }
 
-      addStudentBtn.addEventListener('click', async () => {
-        const cid = studentCourseSelect.value; const roll = studentRoll.value.trim(); const name = studentName.value.trim();
-        if(!cid){ alert('Select course'); return; } if(!roll || !name){ alert('Enter roll & name'); return; }
-        try{
-          const sSnap = await getDocs(collection(db,'courses',cid,'students'));
-          if(sSnap.docs.find(d=>d.data().roll===roll)){ alert('Roll exists in this course'); return; }
-          await addDoc(collection(db,'courses',cid,'students'), { roll, name });
-          studentRoll.value=''; studentName.value='';
-        }catch(err){ alert('Add student failed: '+err.message); console.error(err); }
-      });
+    // Add course (with semester)
+    addCourseBtn.addEventListener('click', async () => {
+      const sem = courseSem.value; const code = courseCode.value.trim(); const name = courseName.value.trim();
+      if(!sem){ alert('Select semester'); return; }
+      if(!code || !name){ alert('Enter course code and name'); return; }
+      try{
+        // avoid duplicate codes per semester locally
+        if(coursesCache.find(c=>c.code && c.code.toLowerCase()===code.toLowerCase() && String(c.semester)===String(sem))){ alert('Course code exists for this semester'); return; }
+        await addDoc(collection(db,'courses'), { code, name, semester: sem, createdAt: new Date().toISOString() });
+        courseCode.value=''; courseName.value=''; courseSem.value='';
+      }catch(err){ alert('Add course failed: '+err.message); console.error(err); }
+    });
 
-      async function renderCourseList(){
-        courseListWrap.innerHTML = '';
-        if(!coursesCache.length){ courseListWrap.innerHTML = '<div class="muted">No courses yet</div>'; return; }
-        // For each course show counts
-        for(const c of coursesCache){
-          const studentsSnap = await getDocs(collection(db,'courses',c.id,'students'));
-          const attendanceSnap = await getDocs(collection(db,'courses',c.id,'attendance'));
-          const card = document.createElement('div'); card.className='card'; card.style.marginTop='8px';
-          card.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
-            <div><strong>${escapeHtml(c.code)}</strong> — ${escapeHtml(c.name)}<div class="muted small">Students: ${studentsSnap.size} • Days: ${attendanceSnap.size}</div></div>
+    // Add student
+    addStudentBtn.addEventListener('click', async () => {
+      const cid = studentCourseSelect.value; const roll = studentRoll.value.trim(); const name = studentName.value.trim();
+      if(!cid){ alert('Select course'); return; } if(!roll || !name){ alert('Enter roll & name'); return; }
+      try{
+        const sSnap = await getDocs(collection(db,'courses',cid,'students'));
+        if(sSnap.docs.find(d=>d.data().roll===roll)){ alert('Roll exists in this course'); return; }
+        await addDoc(collection(db,'courses',cid,'students'), { roll, name });
+        studentRoll.value=''; studentName.value='';
+      }catch(err){ alert('Add student failed: '+err.message); console.error(err); }
+    });
+
+    // Render course list (cards)
+    async function renderCourseList(){
+      courseListWrap.innerHTML = '';
+      if(!coursesCache.length){ courseListWrap.innerHTML = '<div class="empty">No courses yet</div>'; return; }
+      for(const c of coursesCache){
+        const studentsSnap = await getDocs(collection(db,'courses',c.id,'students'));
+        const attendanceSnap = await getDocs(collection(db,'courses',c.id,'attendance'));
+        const days = attendanceSnap.size;
+        const card = document.createElement('div'); card.className='card'; card.style.marginTop='8px';
+        const semText = c.semester ? `${c.semester} ${c.semester.endsWith('th')? 'sem':'sem'}` : '';
+        card.innerHTML = `
+          <div class="course-row">
+            <div class="course-meta">
+              <strong>${escapeHtml(c.code)}</strong>
+              <div class="tiny">${escapeHtml(c.name)}</div>
+              <div class="muted small">Semester: <strong>${escapeHtml(String(c.semester))}</strong> • Students: ${studentsSnap.size} • Days: ${days}</div>
+            </div>
             <div class="actions">
               <button data-id="${c.id}" class="small-btn mark">Mark</button>
               <button data-id="${c.id}" class="small-btn students ghost">Students</button>
               <button data-id="${c.id}" class="small-btn report ghost">Report</button>
-              <button data-id="${c.id}" class="small-btn" style="background:#ffdddd;color:#b00" data-delete>Delete</button>
+              <button data-id="${c.id}" class="small-btn" style="background:#ffeded;color:#b00" data-delete>Delete</button>
             </div>
           </div>`;
-          courseListWrap.appendChild(card);
+        courseListWrap.appendChild(card);
+      }
+
+      // attach listeners
+      courseListWrap.querySelectorAll('button.mark').forEach(b=> b.addEventListener('click', e=> {
+        const id = e.currentTarget.dataset.id; openMarkForCourse(id);
+      }));
+      courseListWrap.querySelectorAll('button.students').forEach(b=> b.addEventListener('click', e=> {
+        const id = e.currentTarget.dataset.id; openStudentsList(id);
+      }));
+      courseListWrap.querySelectorAll('button.report').forEach(b=> b.addEventListener('click', e=> {
+        const id = e.currentTarget.dataset.id; openReportForCourse(id);
+      }));
+      courseListWrap.querySelectorAll('button[data-delete]').forEach(b=> b.addEventListener('click', async e=>{
+        const id = e.currentTarget.dataset.id;
+        if(!confirm('Delete course and all its data?')) return;
+        await deleteCourseAndSubcollections(id);
+      }));
+    }
+
+    // Populate selects
+    function populateCourseSelects(){
+      [studentCourseSelect, markCourseSelect].forEach(sel=>{
+        if(!sel) return;
+        sel.innerHTML = '';
+        const opt = document.createElement('option'); opt.value=''; opt.textContent='-- select course --'; sel.appendChild(opt);
+        for(const c of coursesCache){
+          const o=document.createElement('option'); o.value=c.id; o.textContent=`${c.code} — ${c.name} (Sem ${c.semester||'-'})`; sel.appendChild(o);
         }
-        // attach listeners
-        courseListWrap.querySelectorAll('button.mark').forEach(b=> b.addEventListener('click', e=> {
-          const id = e.currentTarget.dataset.id; openMarkForCourse(id);
-        }));
-        courseListWrap.querySelectorAll('button.students').forEach(b=> b.addEventListener('click', e=> {
-          const id = e.currentTarget.dataset.id; openStudentsList(id);
-        }));
-        courseListWrap.querySelectorAll('button.report').forEach(b=> b.addEventListener('click', e=> {
-          const id = e.currentTarget.dataset.id; openReportForCourse(id);
-        }));
-        courseListWrap.querySelectorAll('button[data-delete]').forEach(b=> b.addEventListener('click', async e=>{
-          const id = e.currentTarget.dataset.id;
-          if(!confirm('Delete course and all its data?')) return;
-          await deleteCourseAndSubcollections(id);
-        }));
-      }
-
-      function populateCourseSelects(){
-        [studentCourseSelect, markCourseSelect].forEach(sel=>{
-          if(!sel) return;
-          sel.innerHTML = '';
-          const opt = document.createElement('option'); opt.value=''; opt.textContent='-- select course --'; sel.appendChild(opt);
-          for(const c of coursesCache){ const o=document.createElement('option'); o.value=c.id; o.textContent=`${c.code} — ${c.name}`; sel.appendChild(o); }
-        });
-      }
-
-      async function openStudentsList(courseId){
-        const c = coursesCache.find(x=>x.id===courseId); if(!c) return;
-        const sSnap = await getDocs(collection(db,'courses',courseId,'students'));
-        const html = document.createElement('div'); html.className='card';
-        html.innerHTML = `<h3>Students for ${escapeHtml(c.code)} — ${escapeHtml(c.name)}</h3>`;
-        const t=document.createElement('table'); t.innerHTML = `<thead><tr><th>Roll</th><th>Name</th><th>Action</th></tr></thead>`; const tb=document.createElement('tbody');
-        sSnap.forEach(s=>{ const d=s.data(); const tr=document.createElement('tr'); tr.innerHTML=`<td>${escapeHtml(d.roll)}</td><td>${escapeHtml(d.name)}</td><td><button data-id="${s.id}" data-course="${courseId}" class="small-btn" style="background:#ffecec;color:#b00">Remove</button></td>`; tb.appendChild(tr); });
-        t.appendChild(tb); html.appendChild(t); courseListWrap.prepend(html);
-        html.querySelectorAll('button').forEach(btn=> btn.addEventListener('click', async (ev)=>{
-          const sid = ev.currentTarget.dataset.id; const cid = ev.currentTarget.dataset.course; if(!confirm('Remove student?')) return;
-          try{
-            const stuRef = doc(db,'courses',cid,'students',sid); await deleteDoc(stuRef);
-            // remove roll from attendance docs
-            const aSnap = await getDocs(collection(db,'courses',cid,'attendance'));
-            for(const a of aSnap.docs){
-              const adata = a.data(); const pres = Object.assign({}, adata.present || {});
-              // find roll value from removed student document? We don't have roll here; we need roll value:
-              // to simplify, assume the UI removed the doc; clients recalculating reports will ignore missing roll.
-            }
-            alert('Student removed');
-          }catch(err){ alert('Remove failed: '+err.message); console.error(err); }
-        }));
-      }
-
-      function openMarkForCourse(courseId){
-        markCard.style.display='block';
-        markCourseSelect.value = courseId;
-        markDate.value = new Date().toISOString().slice(0,10);
-        attendanceWrap.innerHTML = '';
-        saveAttendanceBtn.style.display = 'none';
-      }
-
-      loadAttendanceBtn.addEventListener('click', async ()=>{
-        const cid = markCourseSelect.value; const date = markDate.value;
-        if(!cid || !date){ alert('Select course and date'); return; }
-        attendanceWrap.innerHTML = '';
-        const sSnap = await getDocs(collection(db,'courses',cid,'students'));
-        const students = []; sSnap.forEach(s=>students.push(s.data()));
-        const aDoc = await getDoc(doc(db,'courses',cid,'attendance',date));
-        const existing = aDoc.exists()? (aDoc.data().present || {}) : {};
-        const table = document.createElement('table'); table.innerHTML = `<thead><tr><th>Roll</th><th>Name</th><th>Present?</th></tr></thead>`; const tb=document.createElement('tbody');
-        students.sort((a,b)=> a.roll.localeCompare(b.roll, undefined, {numeric:true})).forEach(s=>{
-          const tr = document.createElement('tr'); const checked = existing[s.roll] === true ? 'checked' : '';
-          tr.innerHTML = `<td>${escapeHtml(s.roll)}</td><td>${escapeHtml(s.name)}</td><td><input data-roll="${escapeHtml(s.roll)}" type="checkbox" ${checked}></td>`;
-          tb.appendChild(tr);
-        });
-        table.appendChild(tb); attendanceWrap.appendChild(table); saveAttendanceBtn.style.display='block';
       });
+    }
 
-      saveAttendanceBtn.addEventListener('click', async ()=>{
-        const cid = markCourseSelect.value; const date = markDate.value; if(!cid || !date){ alert('Select course & date'); return; }
-        const tbody = document.querySelector('#attendance-table-wrap table tbody'); if(!tbody){ alert('Load students first'); return; }
-        const record = {};
-        tbody.querySelectorAll('tr').forEach(tr=>{ const inp = tr.querySelector('input'); record[inp.dataset.roll] = !!inp.checked; });
-        try{ await setDoc(doc(db,'courses',cid,'attendance',date), { present: record, updatedAt: new Date().toISOString() }); alert('Saved'); }
-        catch(err){ alert('Save failed: '+err.message); console.error(err); }
-      });
-
-      async function openReportForCourse(courseId){
-        const wrap = document.getElementById('report-table-wrap'); wrap.innerHTML='';
-        const sSnap = await getDocs(collection(db,'courses',courseId,'students'));
-        const students=[]; sSnap.forEach(s=>students.push(s.data()));
-        const aSnap = await getDocs(collection(db,'courses',courseId,'attendance'));
-        const dates=[]; const records={}; aSnap.forEach(d=>{ dates.push(d.id); records[d.id] = d.data().present || {}; });
-        const totalDays = dates.length;
-        const table = document.createElement('table'); table.innerHTML = `<thead><tr><th>Roll</th><th>Name</th><th>Present</th><th>Total</th><th>%</th></tr></thead>`;
-        const tb = document.createElement('tbody');
-        students.forEach(s=>{ let present=0; dates.forEach(d=>{ if(records[d] && records[d][s.roll]) present++; }); const percent = totalDays? Math.round((present/totalDays)*100):0;
-          const tr=document.createElement('tr'); tr.innerHTML = `<td>${escapeHtml(s.roll)}</td><td>${escapeHtml(s.name)}</td><td>${present}</td><td>${totalDays}</td><td><span class="${percent>=75?'ok':'danger'}">${percent}%</span><div class="pbar" style="margin-top:6px"><i style="width:${percent}%"></i></div></td>`;
-          tb.appendChild(tr);
-        });
-        table.appendChild(tb); wrap.appendChild(table);
-      }
-
-      async function deleteCourseAndSubcollections(courseId){
+    // Open students list (simple table with remove)
+    async function openStudentsList(courseId){
+      const c = coursesCache.find(x=>x.id===courseId); if(!c) return;
+      const sSnap = await getDocs(collection(db,'courses',courseId,'students'));
+      const html = document.createElement('div'); html.className='card';
+      html.innerHTML = `<h3>Students for ${escapeHtml(c.code)} — ${escapeHtml(c.name)}</h3>`;
+      const t=document.createElement('table'); t.innerHTML = `<thead><tr><th>Roll</th><th>Name</th><th>Action</th></tr></thead>`; const tb=document.createElement('tbody');
+      sSnap.forEach(s=>{ const d=s.data(); const tr=document.createElement('tr'); tr.innerHTML=`<td>${escapeHtml(d.roll)}</td><td>${escapeHtml(d.name)}</td><td><button data-id="${s.id}" data-course="${courseId}" class="small-btn" style="background:#ffecec;color:#b00">Remove</button></td>`; tb.appendChild(tr); });
+      t.appendChild(tb); html.appendChild(t); courseListWrap.prepend(html);
+      html.querySelectorAll('button').forEach(btn=> btn.addEventListener('click', async (ev)=>{
+        const sid = ev.currentTarget.dataset.id; const cid = ev.currentTarget.dataset.course; if(!confirm('Remove student?')) return;
         try{
-          const sSnap = await getDocs(collection(db,'courses',courseId,'students'));
-          for(const s of sSnap.docs) await deleteDoc(doc(db,'courses',courseId,'students',s.id));
-          const aSnap = await getDocs(collection(db,'courses',courseId,'attendance'));
-          for(const a of aSnap.docs) await deleteDoc(doc(db,'courses',courseId,'attendance',a.id));
-          await deleteDoc(doc(db,'courses',courseId));
-          alert('Course deleted');
-        }catch(err){ alert('Delete failed: '+err.message); console.error(err); }
-      }
+          const stuRef = doc(db,'courses',cid,'students',sid); await deleteDoc(stuRef);
+          alert('Student removed');
+        }catch(err){ alert('Remove failed: '+err.message); console.error(err); }
+      }));
+    }
 
-      btnRefresh.addEventListener('click', ()=> { if(coursesUnsub){ coursesUnsub(); coursesUnsub = null; } subscribeCourses(); });
-
-      // auth state observer
-      onAuthChanged(user => {
-        if(user){
-          document.getElementById('teacher-email').textContent = user.email || '';
-          authCard.style.display='none';
-          dashboard.style.display='block';
-          subscribeCourses();
-        }else{
-          // signed out
-          authCard.style.display='block';
-          dashboard.style.display='none';
-          if(coursesUnsub){ coursesUnsub(); coursesUnsub = null; }
-        }
-      });
-
-      // expose a helper to ensure selects update when snapshot fires
-      function ensurePopulatedSelects(){ populateCourseSelects(); }
-
-      // initial setup
+    // Open mark UI
+    function openMarkForCourse(courseId){
+      markCard.style.display='block'; reportCard.style.display='none';
+      markCourseSelect.value = courseId;
       markDate.value = new Date().toISOString().slice(0,10);
+      attendanceWrap.innerHTML = ''; saveAttendanceBtn.style.display = 'none';
+      // scroll to mark-card
+      markCard.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+
+    // Load attendance for date
+    loadAttendanceBtn.addEventListener('click', async ()=>{
+      const cid = markCourseSelect.value; const date = markDate.value;
+      if(!cid || !date){ alert('Select course and date'); return; }
+      attendanceWrap.innerHTML = '';
+      const sSnap = await getDocs(collection(db,'courses',cid,'students'));
+      const students = []; sSnap.forEach(s=>students.push(s.data()));
+      const aDoc = await getDoc(doc(db,'courses',cid,'attendance',date));
+      const existing = aDoc.exists()? (aDoc.data().present || {}) : {};
+      // render cards instead of table (teacher mark UI — checkboxes)
+      const wrap = document.createElement('div'); wrap.className='card-grid';
+      students.sort((a,b)=> a.roll.localeCompare(b.roll, undefined, {numeric:true})).forEach(s=>{
+        const c = document.createElement('div'); c.className='student-card';
+        const checked = existing[s.roll] === true ? 'checked' : '';
+        c.innerHTML = `<div class="left"><div class="roll">${escapeHtml(s.roll)}</div><div class="tiny">${escapeHtml(s.name)}</div></div>
+          <div class="controls"><label class="tiny">Present</label><input data-roll="${escapeHtml(s.roll)}" type="checkbox" ${checked}></div>`;
+        wrap.appendChild(c);
+      });
+      attendanceWrap.appendChild(wrap); saveAttendanceBtn.style.display='block';
     });
+
+    // Save attendance
+    saveAttendanceBtn.addEventListener('click', async ()=>{
+      const cid = markCourseSelect.value; const date = markDate.value; if(!cid || !date){ alert('Select course & date'); return; }
+      const inputs = attendanceWrap.querySelectorAll('input[type="checkbox"]');
+      if(!inputs.length){ alert('Load students first'); return; }
+      const record = {};
+      inputs.forEach(inp=> record[inp.dataset.roll] = !!inp.checked );
+      try{ await setDoc(doc(db,'courses',cid,'attendance',date), { present: record, updatedAt: new Date().toISOString() }); alert('Saved'); }
+      catch(err){ alert('Save failed: '+err.message); console.error(err); }
+    });
+
+    // Open report (renders student card list with totals)
+    async function openReportForCourse(courseId){
+      reportCard.style.display='block'; markCard.style.display='none';
+      reportTableWrap.innerHTML = ''; reportMeta.textContent = '';
+      const c = coursesCache.find(x=>x.id===courseId); if(!c) return;
+      // fetch students & attendance
+      const sSnap = await getDocs(collection(db,'courses',courseId,'students'));
+      const students=[]; sSnap.forEach(s=>students.push(s.data()));
+      const aSnap = await getDocs(collection(db,'courses',courseId,'attendance'));
+      const dates=[]; const records={}; aSnap.forEach(d=>{ dates.push(d.id); records[d.id] = d.data().present || {}; });
+      const totalDays = dates.length;
+      // render cards
+      const grid = document.createElement('div'); grid.className = 'card-grid';
+      students.forEach(s=>{
+        let present = 0;
+        const detail = [];
+        dates.forEach(d => {
+          const p = (records[d] && records[d][s.roll]) ? true : false;
+          detail.push({ date: d, present: p });
+          if(p) present++;
+        });
+        const percent = totalDays? Math.round((present/totalDays)*100):0;
+        const sc = document.createElement('div'); sc.className = 'student-card';
+        // summary left and details right (collapsed details as small cards)
+        let detailHtml = detail.map(x=> `<div style="font-size:0.82rem;padding:6px;border-radius:8px;background:${x.present ? '#ecffef' : '#fff5f5'};border:1px solid ${x.present ? '#d1fae5' : '#fee2e2'};margin-bottom:6px"><strong style="display:block">${x.date}</strong><span style="font-weight:700;color:${x.present? '#047857':'#b91c1c'}">${x.present? 'Present':'Absent'}</span></div>`).join('');
+        if(!detailHtml) detailHtml = '<div class="tiny muted">No classes yet</div>';
+        sc.innerHTML = `
+          <div style="flex:1">
+            <div style="display:flex;gap:10px;align-items:center;justify-content:space-between">
+              <div><div class="roll">${escapeHtml(s.roll)}</div><div class="tiny">${escapeHtml(s.name)}</div></div>
+              <div style="text-align:right">
+                <div style="font-weight:800">${present}/${totalDays}</div>
+                <div style="margin-top:6px"><span class="${percent>=75? 'ok':'danger'}">${percent}%</span></div>
+                <div class="pbar" style="margin-top:8px"><i style="width:${percent}%"></i></div>
+              </div>
+            </div>
+            <div style="margin-top:10px">${detailHtml}</div>
+          </div>
+        `;
+        grid.appendChild(sc);
+      });
+      reportTableWrap.appendChild(grid);
+      reportMeta.textContent = `${escapeHtml(c.code)} — ${escapeHtml(c.name)} • Semester ${escapeHtml(String(c.semester||'-'))} • Students: ${students.length} • Days: ${totalDays}`;
+      // scroll to report
+      reportCard.scrollIntoView({behavior:'smooth', block:'center'});
+      // attach pdf generator to current rendered report
+      downloadPdfBtn.onclick = () => downloadReportAsPDF(c);
+    }
+
+    // Download current report as PDF using html2canvas + jsPDF
+    async function downloadReportAsPDF(course) {
+      // Create a temporary wrapper with the report contents (clone)
+      const clone = reportTableWrap.cloneNode(true);
+      // Add course header
+      const header = document.createElement('div');
+      header.style.padding = '10px 0';
+      header.innerHTML = `<h2 style="margin:0">${escapeHtml(course.code)} — ${escapeHtml(course.name)}</h2><div style="color:#666;margin-top:6px">Semester: ${escapeHtml(String(course.semester||'-'))}</div><div style="height:10px"></div>`;
+      const container = document.createElement('div');
+      container.style.width = '800px'; // width used for PDF rendering (landscape friendly)
+      container.style.padding = '20px';
+      container.style.background = '#fff';
+      container.appendChild(header);
+      container.appendChild(clone);
+
+      // Temporarily append to body (off-screen)
+      container.style.position = 'fixed';
+      container.style.left = '-9999px';
+      document.body.appendChild(container);
+
+      try {
+        // use html2canvas
+        const canvas = await html2canvas(container, {scale:2, useCORS:true, backgroundColor: '#ffffff'});
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        // create PDF (A4 portrait)
+        const pdf = new jsPDF({orientation:'portrait', unit:'pt', format:'a4'});
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        // compute image dims to fit width
+        const imgProps = canvas;
+        const imgW = pageWidth - 40; // margin
+        const imgH = (canvas.height * imgW) / canvas.width;
+        let cursor = 20;
+        pdf.addImage(imgData, 'PNG', 20, cursor, imgW, imgH);
+        // If content longer than page, add more pages
+        let remainingHeight = imgH - (pageHeight - 40);
+        let offsetY = pageHeight - 40;
+        while (remainingHeight > 0) {
+          pdf.addPage();
+          const sy = (canvas.height - remainingHeight) - (canvas.height - (imgH * (Math.ceil((imgH)/(pageHeight-40)) - 1)));
+          // simpler approach: draw same image shifted up
+          pdf.addImage(imgData, 'PNG', 20, 20 - (imgH - (pageHeight - 40)) , imgW, imgH);
+          remainingHeight -= (pageHeight - 40);
+        }
+        const filename = `${course.code || 'report'}-report.pdf`;
+        pdf.save(filename);
+      } catch (err) {
+        console.error(err); alert('PDF generation failed: ' + err.message);
+      } finally {
+        // cleanup
+        document.body.removeChild(container);
+      }
+    }
+
+    // Delete course & subcollections
+    async function deleteCourseAndSubcollections(courseId){
+      try{
+        const sSnap = await getDocs(collection(db,'courses',courseId,'students'));
+        for(const s of sSnap.docs) await deleteDoc(doc(db,'courses',courseId,'students',s.id));
+        const aSnap = await getDocs(collection(db,'courses',courseId,'attendance'));
+        for(const a of aSnap.docs) await deleteDoc(doc(db,'courses',courseId,'attendance',a.id));
+        await deleteDoc(doc(db,'courses',courseId));
+        alert('Course deleted');
+      }catch(err){ alert('Delete failed: '+err.message); console.error(err); }
+    }
+
+    // Refresh button
+    btnRefresh.addEventListener('click', ()=> { if(coursesUnsub){ coursesUnsub(); coursesUnsub = null; } subscribeCourses(); });
+
+    // Auth observer
+    onAuthChanged(user => {
+      if(user){
+        document.getElementById('teacher-email').textContent = user.email || '';
+        authCard.style.display='none';
+        dashboard.style.display='block';
+        subscribeCourses();
+      }else{
+        authCard.style.display='block';
+        dashboard.style.display='none';
+        if(coursesUnsub){ coursesUnsub(); coursesUnsub = null; }
+      }
+    });
+
+    // initial setup
+    markDate.value = new Date().toISOString().slice(0,10);
   </script>
 </body>
 </html>
