@@ -39,48 +39,117 @@
       const refreshBtn = document.getElementById('student-refresh');
       const wrap = document.getElementById('student-report-wrap');
       let attendanceUnsub = null;
+
+      // Load courses
       async function loadCourses(){
         courseSel.innerHTML = '<option value="">-- select course --</option>';
         const snap = await getDocs(collection(db,'courses'));
         snap.forEach(d => {
-          const c = d.data(); const opt = document.createElement('option'); opt.value = d.id; opt.textContent = `${c.code} — ${c.name}`; courseSel.appendChild(opt);
+          const c = d.data(); 
+          const opt = document.createElement('option'); 
+          opt.value = d.id; 
+          opt.textContent = `${c.code} — ${c.name}`; 
+          courseSel.appendChild(opt);
         });
       }
+
+      // Load rolls for course
       async function loadRolls(courseId){
         rollSel.innerHTML = '<option value="">-- select roll --</option>';
         if(!courseId) return;
         const sSnap = await getDocs(collection(db,'courses',courseId,'students'));
-        sSnap.forEach(s=>{ const d=s.data(); const o=document.createElement('option'); o.value=d.roll; o.textContent = `${d.roll} — ${d.name}`; rollSel.appendChild(o); });
+        sSnap.forEach(s=>{ 
+          const d=s.data(); 
+          const o=document.createElement('option'); 
+          o.value=d.roll; 
+          o.textContent = `${d.roll} — ${d.name}`; 
+          rollSel.appendChild(o); 
+        });
       }
+
+      // Show report
       function showReport(courseId, roll){
         wrap.innerHTML = '';
-        if(!courseId || !roll) { wrap.innerHTML = '<div class="card muted">Select course & roll</div>'; return; }
-        const card = document.createElement('div'); card.className='card';
+        if(!courseId || !roll) { 
+          wrap.innerHTML = '<div class="card muted">Select course & roll</div>'; 
+          return; 
+        }
+
+        const card = document.createElement('div'); 
+        card.className='card';
         card.innerHTML = `<h3>Loading...</h3>`;
         wrap.appendChild(card);
-        // compute using onSnapshot of attendance collection for real-time updates
+
+        // unsubscribe old snapshot
         if(attendanceUnsub) attendanceUnsub();
+
+        // listen to attendance collection
         attendanceUnsub = onSnapshot(collection(db,'courses',courseId,'attendance'), snap => {
-          const dates = []; const records = {};
-          snap.forEach(d => { dates.push(d.id); records[d.id] = d.data().present || {}; });
+          const dates = []; 
+          const records = {};
+          snap.forEach(d => { 
+            dates.push(d.id); 
+            records[d.id] = d.data().present || {}; 
+          });
+
           const total = dates.length;
           let present = 0;
           dates.forEach(d => { if(records[d] && records[d][roll]) present++; });
           const percent = total ? Math.round((present/total)*100) : 0;
           const courseText = courseSel.options[courseSel.selectedIndex]?.text || 'Course';
-          card.innerHTML = `<h3>${escapeHtml(courseText)}</h3>
+
+          // summary card
+          card.innerHTML = `
+            <h3>${escapeHtml(courseText)}</h3>
             <div class="muted small">Roll: ${escapeHtml(roll)}</div>
             <div style="margin-top:8px">Attended: <strong>${present}</strong> / <strong>${total}</strong></div>
             <div style="margin-top:8px">Percentage: <strong class="${percent>=75 ? 'ok':'danger'}">${percent}%</strong></div>
-            <div style="margin-top:8px" class="pbar"><i style="width:${percent}%"></i></div>`;
-        }, err => { card.innerHTML = '<div class="muted">Error loading attendance</div>'; console.error(err); });
+            <div style="margin-top:8px" class="pbar"><i style="width:${percent}%"></i></div>
+            <button id="show-details" class="big ghost" style="margin-top:12px">View Class Details</button>
+            <div id="class-details" style="margin-top:16px; display:none;"></div>
+          `;
+
+          // attach details toggle
+          const btn = card.querySelector('#show-details');
+          const classBox = card.querySelector('#class-details');
+
+          btn.addEventListener('click', () => {
+            if(classBox.style.display === 'none'){
+              classBox.style.display = 'block';
+              classBox.innerHTML = '';
+              // build mini-cards for each date
+              dates.forEach(d => {
+                const isPresent = records[d] && records[d][roll];
+                const status = isPresent ? 'Present' : 'Absent';
+                const statusColor = isPresent ? 'green' : 'red';
+                const emoji = isPresent ? '✅' : '❌';
+
+                classBox.innerHTML += `
+                  <div class="card" style="border-left:4px solid ${statusColor}; margin-bottom:8px">
+                    <h4>${d}</h4>
+                    <p style="color:${statusColor}; font-weight:bold">${emoji} ${status}</p>
+                  </div>
+                `;
+              });
+            } else {
+              classBox.style.display = 'none';
+            }
+          });
+        }, err => { 
+          card.innerHTML = '<div class="muted">Error loading attendance</div>'; 
+          console.error(err); 
+        });
       }
 
-      courseSel.addEventListener('change', async ()=>{ await loadRolls(courseSel.value); showReport('', ''); });
+      // events
+      courseSel.addEventListener('change', async ()=>{ 
+        await loadRolls(courseSel.value); 
+        showReport('', ''); 
+      });
       rollSel.addEventListener('change', ()=> showReport(courseSel.value, rollSel.value));
       refreshBtn.addEventListener('click', ()=> showReport(courseSel.value, rollSel.value));
+
       await loadCourses();
-      // ensure initial message
       wrap.innerHTML = '<div class="card muted">Select course & roll to view attendance</div>';
     });
   </script>
