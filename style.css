@@ -1,17 +1,158 @@
-:root{--bg:#f4f7fb;--card:#fff;--accent:#0b63d6;--muted:#6b7280;--danger:#ef4444;--ok:#10b981}
-html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);-webkit-font-smoothing:antialiased}
-.app{max-width:420px;margin:18px auto;padding:12px}
-.center{display:flex;align-items:center;justify-content:center;height:80vh}
-.card{background:var(--card);border-radius:12px;padding:14px;margin-top:12px;box-shadow:0 8px 24px rgba(12,36,61,0.06)}
-h1{margin:0;font-size:18px}
-.muted{color:var(--muted);margin-top:6px}
-.small{font-size:0.9rem}
-input,select{width:100%;padding:10px;border-radius:10px;border:1px solid #e6eef8;margin-top:8px;font-size:1rem}
-button{width:100%;padding:12px;border-radius:10px;border:0;background:var(--accent);color:#fff;font-weight:600;margin-top:12px;font-size:1rem}
-button.ghost{background:transparent;border:1px solid #e6eef8;color:var(--accent)}
-button.big{padding:14px;font-size:1.05rem;border-radius:12px}
-.pbar{height:10px;background:#e6eef8;border-radius:999px;overflow:hidden}
-.pbar>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#0366b3)}
-.ok{color:var(--ok)}
-.danger{color:var(--danger)}
-@media (max-width:420px){ .app{margin:8px} }
+/* 🌟 Root Theme */
+:root {
+    --bg: linear-gradient(135deg, #eef2ff, #fef9f9);
+    --card: rgba(255, 255, 255, 0.85);
+    --accent: #2563eb;
+    --accent-dark: #1e40af;
+    --muted: #6b7280;
+    --danger: #ef4444;
+    --ok: #10b981;
+    --shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+    --radius: 20px;
+    --transition: all 0.3s ease;
+  }
+  
+  /* 🌎 Reset & Base */
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    color: #111827;
+  }
+  
+  /* 📱 App Container */
+  .app {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 20px 16px;
+  }
+  
+  /* 🧩 Card */
+  .card {
+    background: var(--card);
+    backdrop-filter: blur(12px);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-top: 16px;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    cursor: pointer;
+    animation: fadeIn 0.5s ease forwards;
+  }
+  .card:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18);
+  }
+  
+  /* ✨ Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* 📝 Typography */
+  h1, h2, h3 {
+    margin: 0;
+    font-weight: 600;
+  }
+  h3 {
+    font-size: 1.2rem;
+    color: var(--accent-dark);
+  }
+  .muted {
+    color: var(--muted);
+  }
+  .small {
+    font-size: 0.9rem;
+  }
+  
+  /* 🎛️ Inputs */
+  input, select {
+    width: 100%;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid #e6eef8;
+    margin-top: 12px;
+    font-size: 1rem;
+    background: #f9fafb;
+    transition: var(--transition);
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+  }
+  
+  /* 🔘 Buttons */
+  button {
+    width: 100%;
+    padding: 16px;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #fff;
+    font-weight: 600;
+    margin-top: 16px;
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+  button:hover {
+    opacity: 0.95;
+    transform: translateY(-3px);
+  }
+  button.ghost {
+    background: transparent;
+    border: 2px solid var(--accent);
+    color: var(--accent);
+  }
+  button.big {
+    font-size: 1.1rem;
+    padding: 18px;
+  }
+  
+  /* 📊 Progress Bar */
+  .pbar {
+    height: 14px;
+    background: #e5e7eb;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 12px;
+    position: relative;
+  }
+  .pbar > i {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+    transition: width 0.6s ease;
+    border-radius: inherit;
+    animation: grow 1s ease forwards;
+  }
+  @keyframes grow {
+    from { width: 0; }
+    to { width: var(--progress, 50%); }
+  }
+  
+  /* ✅ Status */
+  .ok {
+    color: var(--ok);
+    font-weight: 600;
+  }
+  .danger {
+    color: var(--danger);
+    font-weight: 600;
+  }
+  
+  /* 📱 Mobile Responsiveness */
+  @media (max-width: 480px) {
+    .app {
+      padding: 12px;
+    }
+    .card {
+      padding: 18px;
+      margin-top: 12px;
+    }
+  }
+  
